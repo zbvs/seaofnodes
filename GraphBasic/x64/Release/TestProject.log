@@ -1,0 +1,11 @@
+﻿  Graph.cpp
+  GraphOptimizer.cpp
+  UCodeScanner.cpp
+  UCodeGraphBuilder.cpp
+  Main.cpp
+  Node.cpp
+  UCodeInterpreter.cpp
+  Generating code
+  All 1766 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  TestProject.vcxproj -> C:\Users\tr\Desktop\temp\Compiler\x64\Release\GraphBasic.exe

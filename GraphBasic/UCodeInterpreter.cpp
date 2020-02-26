@@ -5,13 +5,19 @@
 #include "Error.h"
 
 UCodeInterpreter::UCodeInterpreter(const char* path) : function_number_(0){
-	scanner_ = std::make_shared<Scanner*>(new Scanner(path));
+	std::cout << "UCodeInterpreter()" << std::endl;
+	scanner_ = std::make_shared<Scanner>(path);
 	Interpret();
 }
 
+UCodeInterpreter::~UCodeInterpreter() {
+	std::cout << "~UCodeInterpreter()" << std::endl;
+}
+
+
 void UCodeInterpreter::Interpret() {
 	enum { FALSE, TRUE };
-	Scanner* scanner = *scanner_.get();
+	std::shared_ptr<Scanner> scanner = scanner_;
 
 	CFGNode::UOpcode opcode;
 	std::cout << " == Interpreting ... ==" << '\n';
@@ -35,8 +41,8 @@ void UCodeInterpreter::Interpret() {
 		case CFGNode::proc: {
 			std::string proc_name = scanner->GetLabel();
 			std::cout << "proc_name:::" << proc_name << std::endl;
-			UCodeGraphBuilder builder(scanner_,this);
-			Graph* graph = builder.BuildGraph();
+			UCodeGraphBuilder builder(scanner, this);
+			CFG* graph = builder.BuildGraph();
 			graph->set_id(function_id_map()[proc_name]);
 			function_graphs().insert(std::make_pair(proc_name, graph));
 			break;
@@ -51,5 +57,3 @@ void UCodeInterpreter::Interpret() {
 
 	}
 }
-
-

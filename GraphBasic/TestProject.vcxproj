@@ -139,20 +139,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common.h" />
     <ClInclude Include="Error.h" />
-    <ClInclude Include="Graph.h" />
+    <ClInclude Include="CFG.h" />
     <ClInclude Include="GraphOptimizer.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="SSA.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Type.h" />
     <ClInclude Include="UCodeScanner.h" />
     <ClInclude Include="UCodeGraphBuilder.h" />
     <ClInclude Include="json\json.h" />
-    <ClInclude Include="CFG.h" />
+    <ClInclude Include="CFGNode.h" />
     <ClInclude Include="UCodeInterpreter.h" />
+    <ClInclude Include="VDG.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Graph.cpp" />
+    <ClCompile Include="CFG.cpp" />
     <ClCompile Include="GraphOptimizer.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="SSA.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -160,11 +165,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Type.cpp" />
     <ClCompile Include="UCodeScanner.cpp" />
     <ClCompile Include="UCodeGraphBuilder.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="CFG.cpp" />
+    <ClCompile Include="CFGNode.cpp" />
     <ClCompile Include="UCodeInterpreter.cpp" />
+    <ClCompile Include="VDG.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

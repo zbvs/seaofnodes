@@ -4,15 +4,21 @@
 #include <fstream>
 #include "UCodeInterpreter.h"
 
-UCodeGraphBuilder::~UCodeGraphBuilder() {}
 
-Graph* UCodeGraphBuilder::BuildGraph() {
-	Scanner* scanner = *scanner_.get();
+UCodeGraphBuilder::UCodeGraphBuilder(std::shared_ptr<Scanner> scanner, UCodeInterpreter* interpreter) : scanner_(scanner), interpreter_(interpreter) {
+	std::cout << "UCodeGraphBuilder()" << std::endl;
+}
+UCodeGraphBuilder::~UCodeGraphBuilder() {
+	std::cout << "~UCodeGraphBuilder()" << std::endl;
+}
+
+CFG* UCodeGraphBuilder::BuildGraph() {
+	std::shared_ptr<Scanner> scanner = scanner_;
 	CFGNode::UOpcode opcode;
 	LabelMap label_map;
 	JumpMap jump_map;
 	std::string label;
-	Graph* graph = new Graph(Graph::GraphType::GRAPH);
+	CFG* graph = new CFG(CFG::GraphType::GRAPH);
 	opcode = scanner->GetOpcode();
 	CFGNode* start_node = new CFGNode(graph, opcode);
 	graph->AddNodeAsStart(start_node);
@@ -51,11 +57,12 @@ Graph* UCodeGraphBuilder::BuildGraph() {
 		switch (opcode) {
 		case CFGNode::sym: {
 			Value talble_num = scanner->GetValue();
-			cfg_node->inputs().push_back(talble_num);
 			Value location = scanner->GetValue();
-			cfg_node->inputs().push_back(TO_ID(location));
 			Value size = scanner->GetValue();
-			cfg_node->inputs().push_back(size);
+			cfg_node->operands().push_back(TO_ID(location));
+			cfg_node->operands().push_back(size);
+			cfg_node->operands().push_back(talble_num);
+			graph->variable_table().push_back(TO_ID(location));
 			break;
 		}
 		case CFGNode::lda:
@@ -63,19 +70,19 @@ Graph* UCodeGraphBuilder::BuildGraph() {
 		case CFGNode::str: {
 			Value talble_num = scanner->GetValue();
 			Value location = scanner->GetValue();
-			cfg_node->inputs().push_back(TO_ID(location));
-			cfg_node->inputs().push_back(talble_num);
+			cfg_node->operands().push_back(TO_ID(location));
+			cfg_node->operands().push_back(talble_num);
 			break;
 		}
 		case CFGNode::ldc: {
 			Value value = scanner->GetValue();
-			cfg_node->inputs().push_back(value);
+			cfg_node->operands().push_back(value);
 			break;
 		}
 		case CFGNode::call: {
 			std::string fname = scanner->GetString();
 			Value f_id = this->interpreter()->function_id_map()[fname];
-			cfg_node->inputs().push_back(f_id);
+			cfg_node->operands().push_back(f_id);
 			break;
 		}
 		case CFGNode::ujp: 
@@ -123,6 +130,7 @@ Graph* UCodeGraphBuilder::BuildGraph() {
 				break;
 
 			default:
+				//linear flow.
 				prev_node->EdgeFromTo(cfg_node, EDGE_LABEL::EDGE_NONE);
 				break;
 			}
@@ -154,15 +162,15 @@ Graph* UCodeGraphBuilder::BuildGraph() {
 		case CFGNode::fjp: {
 			label = jump_map[cfg_node];
 			CFGNode* target_node = label_map[label];
-			cfg_node->EdgeFromTo(target_node, EDGE_LABEL::EDGE_TRUE);
+			cfg_node->EdgeFromTo(target_node, EDGE_LABEL::EDGE_FALSE);
 			dst_block = target_node->block();
 			current_block->outs().push_back(dst_block);
 			dst_block->ins().push_back(current_block);
 			break;
 		}
-		case CFGNode::nop: {//new block start
+		case CFGNode::nop: {
 			if (prev_opcode!=CFGNode::UOpcode::ujp) {
-				prev_node->EdgeFromTo(cfg_node, EDGE_LABEL::EDGE_NONE);
+				//new block start. need to connect previous block and current block.
 				dst_block = cfg_node->block();
 				current_block->outs().push_back(dst_block);
 				dst_block->ins().push_back(current_block);

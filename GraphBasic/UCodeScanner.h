@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <fstream>
-#include "CFG.h"
+#include "CFGNode.h"
 #include <ctype.h>
 #include "Error.h"
 
@@ -9,7 +9,7 @@
 class Scanner {
 public:
 	Scanner(const char* path);
-
+	~Scanner();
 	
 	CFGNode::UOpcode GetOpcode();
 	CFGNode::UOpcode PreLookOpcode();

@@ -2,8 +2,8 @@
 #include <fstream>
 #include <vector>
 #include <memory>
+#include "CFGNode.h"
 #include "CFG.h"
-#include "Graph.h"
 #include "UCodeScanner.h"
 
 
@@ -16,17 +16,15 @@ typedef std::map<CFGNode*,std::string> JumpMap;
 class UCodeGraphBuilder {
 public:
 	
-	UCodeGraphBuilder(std::shared_ptr<Scanner*> scanner, UCodeInterpreter* interpreter) : scanner_(scanner), interpreter_(interpreter){
-		
-	}
+	UCodeGraphBuilder(std::shared_ptr<Scanner> scanner, UCodeInterpreter* interpreter);
 	~UCodeGraphBuilder();
 	UCodeInterpreter* interpreter() { return interpreter_; }
-	Graph* BuildGraph();
+	CFG* BuildGraph();
 
 	
 private:
 	UCodeInterpreter* interpreter_;
-	std::shared_ptr<Scanner*> scanner_;
+	std::shared_ptr<Scanner> scanner_;
 };
 
 

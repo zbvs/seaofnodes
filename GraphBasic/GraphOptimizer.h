@@ -1,6 +1,6 @@
 /*
 #pragma once
-#include "Graph.h"
+#include "CFG.h"
 
 class GraphOptimizer {
 public:

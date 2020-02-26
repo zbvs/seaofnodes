@@ -2,12 +2,17 @@
 #include "UCodeScanner.h"
 
 Scanner::Scanner(const char* path) {
+	std::cout << "Scanner()" << std::endl;
 	in_file_.open(path);
 	if (!in_file_.is_open()) {
 		_Errmsg( "file open failed");
 	}
 	line_index_ = 0;
 	start_with_label_ = false;
+}
+Scanner::~Scanner() {
+	std::cout << "~Scanner()" << std::endl;
+	in_file_.close();
 }
 
 CFGNode::UOpcode Scanner::PreLookOpcode()
@@ -26,11 +31,11 @@ CFGNode::UOpcode Scanner::PreLookOpcode()
 	
 
 	int opcode_number;
-	for (opcode_number = CFGNode::notop; opcode_number < CFGNode::none; opcode_number++)
+	for (opcode_number = CFGNode::UOpcode::notop; opcode_number < CFGNode::UOpcode::none; opcode_number++)
 		if (!mnemonic.compare(CFGNode::opcode_names_[opcode_number]))
 			break;
 
-	if (opcode_number == CFGNode::none) {
+	if (opcode_number == CFGNode::UOpcode::none) {
 		std::stringstream msg;
 		int temp = line_buffer_[line_index_];
 		msg << "invalid mnemonic :: " << mnemonic;
@@ -58,11 +63,11 @@ CFGNode::UOpcode Scanner::GetOpcode()
 
 
 	int opcode_number;
-	for (opcode_number = CFGNode::notop; opcode_number < CFGNode::none; opcode_number++)
+	for (opcode_number = CFGNode::UOpcode::notop; opcode_number < CFGNode::UOpcode::none; opcode_number++)
 		if (!mnemonic.compare(CFGNode::opcode_names_[opcode_number]))
 			break;
 
-	if (opcode_number == CFGNode::none) {
+	if (opcode_number == CFGNode::UOpcode::none) {
 		std::stringstream msg;
 		msg << "invalid mnemonic : " << mnemonic;
 		_Errmsg( msg.str());

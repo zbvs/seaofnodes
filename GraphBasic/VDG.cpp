@@ -312,7 +312,7 @@ void VDGBuilder::BuildVDG(CFG* cfg_graph) {
 					if (control_out->opcode() == Node::IF) {
 						size_t index = src_block->outs().GetIndexOf(current_block);
 						Node* projection;
-						if (src_block->out_directions()[index] == true)
+						if (src_block->out_directions()[index] == EDGE_LABEL::EDGE_TRUE)
 							projection = new Node(Node::Opcode::PROJECTION_TRUE, TO_TRUE_ID(src_block->id()));
 						else
 							projection = new Node(Node::Opcode::PROJECTION_FALSE, TO_FALSE_ID(src_block->id()));

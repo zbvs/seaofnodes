@@ -10,12 +10,15 @@ typedef CommonVector<Node*> NodeVector;
 
 class Node {
 public:
-#define NODE_ID_START 0
-#define NODE_ID_END -1
-#define NODE_ID_ENTRY -2
+
+#define TO_REGION_ID(id) (id | 0x1000) 
+#define TO_REGION_START_ID(id) (id | 0x2000) 
+#define TO_TRUE_ID(id) (id | 0x3000) 
+#define TO_FALSE_ID(id) (id | 0x4000) 
 
 	enum Opcode {
-		START, REGION, PROJECTION_TRUE, PROJECTION_FALSE, REGION_START, IF, END, notop, neg, incop, decop, OC_dup, swp, add, sub, mult, divop,
+		START, REGION, PROJECTION_TRUE, PROJECTION_FALSE, REGION_START, 
+		IF, END, notop, neg, incop, decop, OC_dup, swp, add, sub, mult, divop,
 		modop, andop, orop, gt, lt, ge, le, eq, ne,
 		lod, ldc, lda, ldi, ldp, str, sti, ujp, tjp, fjp,
 		call, ret, retv, chkh, chkl, nop, proc, endop, bgn, sym,
@@ -23,8 +26,8 @@ public:
 	};
 
 
-	static const int NO_OPCODES = 45;
-	static constexpr const char* opcode_names_[NO_OPCODES] = {
+	
+	static constexpr const char* opcode_names_[] = {
 	 "START", "REGION", "PROJECTION_TRUE", "PROJECTION_FALSE", "REGION_START", 
 	 "IF", "END", "notop",  "neg",   "inc",    "dec",    "dup",   "swp",  "add", "sub",
 	 "mult",     "div",   "mod",    "and",  "or",    "gt",     "lt",    "ge",

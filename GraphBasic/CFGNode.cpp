@@ -155,6 +155,15 @@ void Edge::Print(std::string msg) {
 
 }
 
+std::vector<EDGE_LABEL> Block::out_directions() {
+	std::vector<EDGE_LABEL> direction_vector;
+	int size = this->nodes().size();
+	CFGNode* node = this->nodes()[size - 1];
+	for (EdgeVector::iterator it = node->out_edges().begin(); it != node->out_edges().end(); it++) {
+		direction_vector.push_back((*it)->label());
+	}
+	return direction_vector;
+}
 json Block::GetJson() {
 	json j;
 	std::stringstream msg;

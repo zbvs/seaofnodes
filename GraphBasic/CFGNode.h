@@ -163,6 +163,7 @@ public:
 	BlockVector& childs() { return childs_; }
 	BlockVector& ins() { return ins_; }
 	BlockVector& outs() { return outs_; }
+	std::vector<EDGE_LABEL> out_directions();
 	json GetJson();
 private:
 	std::string title_;

@@ -20,6 +20,7 @@ void Environment::push_node(Node* node) {
 
 
 Node* Environment::GetDef(Variable variable) {
+	printf("get def %x\n", variable.value());
 	VariableVector var_vec = variables();
 	for (VariableVector::iterator it = var_vec.begin(); it != var_vec.end(); it++) {
 		var_pair pair = *it;
@@ -43,21 +44,26 @@ void Environment::PutDef(Node* def_node, Variable variable) {
 	variables().push_back(std::make_pair(variable, def_node));
 }
 
-
+VDGBuilder::VDGBuilder() {
+	std::cout << "VDGBuilder()" << std::endl;
+}
+VDGBuilder::~VDGBuilder() {
+	std::cout << "~VDGBuilder()" << std::endl;
+}
 Node* VDGBuilder::VisitBlock(Block* block, Node* region) {
-	//printf("Visit REGION: %d\n", region->id());
+	printf("Visit REGION: %d\n", region->id());
 
 	CFGNodeVector cfg_nodes = block->nodes();
 	Node* last_control_out = region;
 	Environment& env = environment();
-	Node* node;
+	Node* node = NULL;
 
-	Node* region_start = new Node(Node::REGION_START, TO_REGION_START_ID(block->id()));
-	region_start->push_control_input(region);
+	//Node* region_start = new Node(Node::REGION_START, TO_REGION_START_ID(block->id()));
+	//region_start->push_control_input(region);
 
 	for (CFGNodeVector::iterator cfg_it = cfg_nodes.begin(); cfg_it != cfg_nodes.end(); cfg_it++) {
 		CFGNode* cfg_node = *cfg_it;
-		//printf("!!%d: %s\n", cfg_node->id(), cfg_node->title().c_str());
+		printf("!!%d: %s\n", cfg_node->id(), cfg_node->title().c_str());
 		switch (cfg_node->opcode()) {
 			//control node
 		case CFGNode::fjp:
@@ -75,7 +81,7 @@ Node* VDGBuilder::VisitBlock(Block* block, Node* region) {
 		}
 						   //push 1 stack
 		case CFGNode::ldc: {
-			node = new Node(Node::ldc, cfg_node->operands()[0], cfg_node->id());
+			node = new Node(Node::ldc, cfg_node->id(), cfg_node->operands()[0]);
 			env.push_node(node);
 			break;
 		}
@@ -88,8 +94,7 @@ Node* VDGBuilder::VisitBlock(Block* block, Node* region) {
 			break;
 		}
 		case CFGNode::lda: {
-			Value addr_value = cfg_node->operands()[0];
-			node = new Node(Node::ldc, addr_value, cfg_node->id());
+			node = new Node(Node::ldc, cfg_node->id(), cfg_node->operands()[0]);
 			env.push_node(node);
 			break;
 		}
@@ -97,6 +102,7 @@ Node* VDGBuilder::VisitBlock(Block* block, Node* region) {
 		case CFGNode::str: {
 			Variable variable = Variable::toVariable(cfg_node->operands()[0]);
 			node = env.GetDef(variable);
+			
 			node->set_id(cfg_node->id());
 			node->set_opcode(Node::str);
 			node->push_value_input(env.pop_node(node));
@@ -224,14 +230,18 @@ Node* VDGBuilder::VisitBlock(Block* block, Node* region) {
 		}
 						  //does'n use stack
 		default: {
-			node = new Node(Node::none, cfg_node->id());
+			
+			Node::Opcode node_opcode = Node::toNodeOpcode(cfg_node->opcode());
+
+			node = new Node(node_opcode, cfg_node->id());
 			break;
 		}
 		}
 		if (!this->vdg()->nodes().IsContain(node))
 			this->vdg()->add_node(node);
 
-		//printf("!!%d: %s\n", cfg_node->id(), cfg_node->title().c_str());
+		//(zbvs
+		printf("cfg opcode:%s , node opcode:%s\n", CFGNode::opcode_names_[cfg_node->opcode()], Node::opcode_names_[node->opcode()]);
 		switch (node->opcode()) {
 		case Node::phi: {
 			if (node->control_count() == 0)
@@ -248,9 +258,14 @@ Node* VDGBuilder::VisitBlock(Block* block, Node* region) {
 			break;
 		}
 		default:
-			if (node->control_count() != 0)
+			if (node->control_count() != 0) {
+				//(zbvs
+				std::cout << "wrong control count:" << node->GetTitle() << std::endl;
+				printf("control count:: %d\n", node->control_count());
 				_Errmsg("wrong control count");
-			node->push_control_input(region_start);
+			}
+			//(zbvs other don't need control input
+			//node->push_control_input(region_start);
 			break;
 		}
 
@@ -263,7 +278,7 @@ Node* VDGBuilder::VisitBlock(Block* block, Node* region) {
 
 void VDGBuilder::BuildVDG(CFG* cfg_graph) {
 	typedef std::pair<Block*, Node*> BlockPair;
-
+	addtional_id_ = cfg_graph->nodes().size();
 	
 	
 	VDG* vdg = new VDG();
@@ -273,12 +288,14 @@ void VDGBuilder::BuildVDG(CFG* cfg_graph) {
 
 	std::map<Block*, Node*> ControlOutMap;
 
-	Node* end = new Node(Node::Opcode::END, -1);
+	Node* end = new Node(Node::Opcode::END, NODE_END_ID);
 	vdg->set_end(end);
 	vdg->add_node(end);
 	
+
 	Block* current_block = cfg_graph->end()->block();
 	Node* current_region = new Node(Node::Opcode::REGION, TO_REGION_ID(current_block->id()));
+	printf("---- visit end block %d %s\n", current_block->nodes()[0]->id(), current_block->title().c_str());
 	Node* control_out = VisitBlock(current_block, current_region);
 	end->push_control_input(control_out);
 	ControlOutMap[current_block] = current_region;
@@ -294,7 +311,7 @@ void VDGBuilder::BuildVDG(CFG* cfg_graph) {
 
 		BlockVector srcs = current_block->ins();
 		if (srcs.size() == 0) {
-			printf("start block %d %s\n", current_block->nodes()[0]->id(), current_block->title().c_str());
+			printf("---- visit start block %d %s\n", current_block->nodes()[0]->id(), current_block->title().c_str());
 			Node* start_node = new Node(Node::Opcode::START, -2);
 			current_region->push_control_input(start_node);
 			vdg->set_start(start_node);
@@ -306,11 +323,11 @@ void VDGBuilder::BuildVDG(CFG* cfg_graph) {
 				if (!visited.IsContain(src_block)) {
 					Node* src_region = new Node(Node::Opcode::REGION, TO_REGION_ID(src_block->id()));
 					vdg->add_node(src_region);
-					printf("visit block %d %s\n", src_block->id(), src_block->title().c_str());
+					printf("---- visit normal block %d %s\n", src_block->id(), src_block->title().c_str());
 					control_out = VisitBlock(src_block, src_region);
 					ControlOutMap[src_block] = control_out;
 					if (control_out->opcode() == Node::IF) {
-						size_t index = src_block->outs().GetIndexOf(current_block);
+						int index = src_block->outs().GetIndexOf(current_block);
 						Node* projection;
 						if (src_block->out_directions()[index] == EDGE_LABEL::EDGE_TRUE)
 							projection = new Node(Node::Opcode::PROJECTION_TRUE, TO_TRUE_ID(src_block->id()));
@@ -326,9 +343,9 @@ void VDGBuilder::BuildVDG(CFG* cfg_graph) {
 				else {
 					Node* control_out = ControlOutMap[src_block];
 					if (control_out->opcode() == Node::IF) {
-						size_t index = src_block->outs().GetIndexOf(current_block);
+						int index = src_block->outs().GetIndexOf(current_block);
 						Node* projection;
-						if (src_block->out_directions()[index] == true)
+						if (src_block->out_directions()[index] == EDGE_LABEL::EDGE_TRUE)
 							projection = new Node(Node::Opcode::PROJECTION_TRUE, TO_TRUE_ID(src_block->id()));
 						else
 							projection = new Node(Node::Opcode::PROJECTION_FALSE, TO_FALSE_ID(src_block->id()));

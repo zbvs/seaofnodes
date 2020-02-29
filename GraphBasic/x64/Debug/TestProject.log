@@ -1,22 +1,26 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (GraphBasic.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   CFG.cpp
-  UCodeScanner.cpp
-  UCodeGraphBuilder.cpp
-  Main.cpp
   CFGNode.cpp
-c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\cfgnode.cpp(160): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Main.cpp
+  Node.cpp
+  UCodeGraphBuilder.cpp
   UCodeInterpreter.cpp
+  UCodeScanner.cpp
   VDG.cpp
-c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\vdg.cpp(78): error C2661: 'Node::Node': no overloaded function takes 3 arguments
-c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\vdg.cpp(92): error C2661: 'Node::Node': no overloaded function takes 3 arguments
-c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\vdg.cpp(315): warning C4805: '==': unsafe mix of type '_Ty' and type 'bool' in operation
+c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\vdg.cpp(23): warning C4477: 'printf' : format string '%x' requires an argument of type 'unsigned int', but variadic argument 1 has type 'Value'
+  c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\vdg.cpp(23): note: consider using '%zx' in the format string
+c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\vdg.cpp(281): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\common.h(108): warning C4244: 'return': conversion from '__int64' to 'int', possible loss of data
+  c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\common.h(104): note: while compiling class template member function 'int CommonVector<Block *>::GetIndexOf(T)'
           with
           [
-              _Ty=EDGE_LABEL
+              T=Block *
           ]
-c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\vdg.cpp(331): warning C4805: '==': unsafe mix of type '_Ty' and type 'bool' in operation
+  c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\vdg.cpp(330): note: see reference to function template instantiation 'int CommonVector<Block *>::GetIndexOf(T)' being compiled
           with
           [
-              _Ty=EDGE_LABEL
+              T=Block *
           ]
+  c:\users\tr\desktop\study\compiler\study_workspace\seaofnodes\graphbasic\cfgnode.h(176): note: see reference to class template instantiation 'CommonVector<Block *>' being compiled
   Generating Code...
+  TestProject.vcxproj -> C:\Users\tr\Desktop\study\compiler\study_workspace\SeaOfNodes\x64\Debug\SeaOfNodes.exe

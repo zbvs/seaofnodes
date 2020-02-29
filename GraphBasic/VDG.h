@@ -25,6 +25,8 @@ private:
 	NodeVector stack_;
 };
 
+
+
 class VDGBuilder {
 public:
 	VDGBuilder();
@@ -37,6 +39,7 @@ public:
 	VDG* vdg() { return vdg_; }
 private:
 	VDG* vdg_;
+	int addtional_id_;
 	Environment environment_;
 }; 
 

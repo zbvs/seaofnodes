@@ -21,7 +21,7 @@ public:
 	void InsertPhiToBlock(Block* DF, Value variable);
 	void InsertPhi(); 
 	void CalculateDominanceFrontier();
-	void SSAVisit(Block* block, Variable varaible, int& name_count);
+	void SSAVisit(Block* block, VariableCounter& var_countert);
 	void ToSSA();
 	void AddNodeAsStart(CFGNode* node);
 	void AddNodeAsEnd(CFGNode* node);

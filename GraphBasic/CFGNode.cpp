@@ -98,6 +98,7 @@ EdgeVector Edge::GetIntersection(EdgeVector set1, EdgeVector set2) {
 			temp_set_1_f.push_back(edge);
 		}
 		else {
+			
 			stream << "intersection on invalied label," << edge->label() << "," << edge->from()->title().c_str() << edge->to()->title().c_str();
 			_Errmsg(stream.str());
 		}
@@ -157,7 +158,9 @@ void Edge::Print(std::string msg) {
 
 std::vector<EDGE_LABEL> Block::out_directions() {
 	std::vector<EDGE_LABEL> direction_vector;
-	int size = this->nodes().size();
+	size_t size = this->nodes().size();
+	if (size == 0)
+		return direction_vector;
 	CFGNode* node = this->nodes()[size - 1];
 	for (EdgeVector::iterator it = node->out_edges().begin(); it != node->out_edges().end(); it++) {
 		direction_vector.push_back((*it)->label());
@@ -201,6 +204,7 @@ std::string CFGNode::GetInstruction() {
 	}
 	return msg.str();
 }
+
 json CFGNode::GetJson() {
 	json j;
 

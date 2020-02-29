@@ -41,6 +41,24 @@ private:
 };
 
 
+class VariableCounter {
+public:
+	VariableCounter(Variable visit_variable) : variable_(visit_variable), def_count_(0) {
+
+	}
+	~VariableCounter() { if (use_count_stack_.size() != 0)_Errmsg("use_count_stack_ hasn't been fully poped"); }
+	Variable variable() { return variable_; }
+	int def_count() { return def_count_; }
+	void inc_def_count() { def_count_++; set_current_use_count(def_count_); }
+	void push_use_count(int count) { use_count_stack_.push_back(count); }
+	int pop_use_count() { int result = use_count_stack_.back(); use_count_stack_.pop_back(); return result; }
+	int get_use_count() { return use_count_stack_.back(); }
+	void set_current_use_count(int count) { if (use_count_stack_.size() == 0)_Errmsg("Invalid var use_count stack size"); use_count_stack_[use_count_stack_.size()-1] = count; }
+private:
+	Variable variable_;
+	int def_count_;
+	std::vector<int> use_count_stack_;
+};
 
 template<class T>
 class CommonVector {

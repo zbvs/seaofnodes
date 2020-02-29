@@ -418,6 +418,7 @@ CFG* CFG::CreateGraphClone() {
 	return new_graph;
 }
 
+
 void CFG::CreateDFST() {
 
 	Block* root = this->start()->block();
@@ -523,6 +524,13 @@ void CFG::DFVisit(Block* node) {
 	}
 }
 
+
+
+void CFG::CalculateDominanceFrontier() {
+	Block* root = this->start()->block();
+	DFVisit(root);
+}
+
 void CFG::InsertPhiToBlock(Block* DF, Value variable) {
 	CFGNode* phi_node = new CFGNode(this, CFGNode::UOpcode::phi);
 
@@ -537,7 +545,7 @@ void CFG::InsertPhiToBlock(Block* DF, Value variable) {
 
 	phi_node->operands().push_back(variable);//result part of operands
 	for (EdgeVector::iterator edge_it = edge_vector_copy.begin(); edge_it != edge_vector_copy.end(); edge_it++) {
-		
+
 		Edge* edge = *edge_it;
 		CFGNode* from_node = edge->from();
 		EDGE_LABEL label = edge->label();
@@ -545,26 +553,28 @@ void CFG::InsertPhiToBlock(Block* DF, Value variable) {
 		from_node->EdgeFromTo(phi_node, label);
 		phi_node->operands().push_back(variable);//input part of operands
 	}
-	phi_node->EdgeFromTo(old_first_node, EDGE_NONE);
+	phi_node->EdgeFromTo(old_first_node, EDGE_LABEL::EDGE_NONE);
 	CFGNodeVector::iterator insert_position = DF->nodes().begin();
 	DF->nodes().insert(insert_position, phi_node);
 }
 
 
+
+
 void CFG::InsertPhi() {
 	DoneList done_list;
-	
+
 	for (CFGNodeVector::iterator node_it = this->nodes().begin(); node_it != this->nodes().end(); node_it++) {
 		CFGNode* node = *node_it;
 		if (node->opcode() == CFGNode::UOpcode::sym) {
 			Value variable = node->operands()[0];
 			BlockVector temp_vector;
 			done_list[variable] = temp_vector;
-		}		
+		}
 	}
 
 	BlockVector to_visit = this->blocks();
-	
+
 	//for (BlockVector::iterator block_it = this->blocks().begin(); block_it != this->blocks().end(); block_it++) {
 	//Block* block = *block_it;
 	while (!to_visit.empty()) {
@@ -579,7 +589,7 @@ void CFG::InsertPhi() {
 					Value variable = node->operands()[0];
 					for (BlockVector::iterator DF_it = block->dominance_frontiers().begin(); DF_it != block->dominance_frontiers().end(); DF_it++) {
 						Block* DF = *DF_it;
-						if(!done_list[variable].IsContain(DF) ) {
+						if (!done_list[variable].IsContain(DF)) {
 							InsertPhiToBlock(DF, variable);
 							done_list[variable].push_back(DF);
 							to_visit.push_back(DF);
@@ -592,15 +602,12 @@ void CFG::InsertPhi() {
 	}
 }
 
-void CFG::CalculateDominanceFrontier() {
-	Block* root = this->start()->block();
-	DFVisit(root);
-}
 
 
-void CFG::SSAVisit(Block* block ,Variable visit_variable, int& name_count) {
-	int restore_count = name_count;
+void CFG::SSAVisit(Block* block ,VariableCounter& var_counter) {
 
+	var_counter.push_use_count(var_counter.def_count());
+	Variable visit_variable = var_counter.variable();
 	for (CFGNodeVector::iterator it = block->nodes().begin(); it != block->nodes().end(); it++) {
 		CFGNode* node = *it;
 
@@ -610,8 +617,8 @@ void CFG::SSAVisit(Block* block ,Variable visit_variable, int& name_count) {
 		case CFGNode::str: {
 			Variable variable = Variable::toVariable(node->operands()[0]);
 			if (visit_variable.isSameVariable(variable)) {
-				name_count++;
-				node->operands()[0] = visit_variable.toOriginValue() + name_count;
+				var_counter.inc_def_count();
+				node->operands()[0] = visit_variable.toOriginValue() + var_counter.def_count();
 			}
 			break;
 		}
@@ -620,7 +627,7 @@ void CFG::SSAVisit(Block* block ,Variable visit_variable, int& name_count) {
 		case CFGNode::lod: {
 			Variable variable = Variable::toVariable(node->operands()[0]);
 			if (visit_variable.isSameVariable(variable)) {
-				node->operands()[0] = visit_variable.toOriginValue() + name_count;
+				node->operands()[0] = visit_variable.toOriginValue() + var_counter.get_use_count();
 			}
 			break;
 		}
@@ -643,7 +650,7 @@ void CFG::SSAVisit(Block* block ,Variable visit_variable, int& name_count) {
 						_Errmsg("Invalid blokc index in succeossr's ins");
 
 					size_t index = std::distance(successor->ins().begin(), it);
-					node->operands()[index + 1] = visit_variable.toOriginValue() + name_count;
+					node->operands()[index + 1] = visit_variable.toOriginValue() + var_counter.def_count();
 					
 				}
 				break;
@@ -653,10 +660,9 @@ void CFG::SSAVisit(Block* block ,Variable visit_variable, int& name_count) {
 	}
 	for (BlockVector::iterator it = block->childs().begin(); it != block->childs().end(); it++) {
 		Block* child = *it;
-		SSAVisit(child, visit_variable, name_count);
+		SSAVisit(child, var_counter);
 	}
-
-	name_count = restore_count;
+	var_counter.pop_use_count();
 }
 
 
@@ -664,9 +670,11 @@ void CFG::ToSSA() {
 	Block* root = start()->block();
 	for (ValueVector::iterator it = variable_table().begin(); it != variable_table().end(); it++) {
 		Value value = *it;
-		Variable variable = Variable::toVariable(value);
-		int count = 0;
-		SSAVisit(root, variable, count);
+		
+		VariableCounter var_counter(Variable::toVariable(value));
+		
+		SSAVisit(root, var_counter);
 	}
+	
 }
 

@@ -92,6 +92,7 @@ CFG* UCodeGraphBuilder::BuildGraph() {
 			break;
 		}
 		case CFGNode::endop: {
+			graph->set_end(cfg_node);
 			done = TRUE;
 			break;
 		}

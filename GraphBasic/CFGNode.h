@@ -45,6 +45,7 @@ public:
 
 
 
+
 	static const int NO_OPCODES = 42;
 	static constexpr const char* opcode_names_[NO_OPCODES] = {
 	 "notop",  "neg",   "inc",    "dec",    "dup",   "swp",  "add", "sub",
@@ -182,7 +183,7 @@ private:
 
 
 enum EDGE_LABEL {
-	EDGE_NONE, EDGE_TRUE, EDGE_FALSE
+		EDGE_NONE, EDGE_TRUE, EDGE_FALSE
 };
 
 class Edge {
